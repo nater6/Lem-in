@@ -53,7 +53,8 @@ if fromVertex == nil || toVertex == nil {
 		err := fmt.Errorf("invalid edge (%v ---> %v)", from, to)
 		fmt.Println(err.Error())
 } else if contains(fromVertex.adjacent, to) {
-	
+		err := fmt.Errorf(" Exsisting edge (%v ---> %v)", from, to)
+		fmt.Println(err.Error())
 	} else {
 	//add edge
 		fromVertex.adjacent = append(fromVertex.adjacent, toVertex)
