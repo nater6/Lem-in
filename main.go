@@ -3,159 +3,126 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"lemin/lemin"
 	"os"
-	"strconv"
 	"strings"
 )
 
-type Room struct {
-	Roomname string
-	x        float64
-	y        float64
-}
-
-type Link struct {
-	startroom string
-	endroom   string
-	distance  float64
-}
-
-type Path struct {
-	start bool
-	final bool
-}
-//graph structre 
+//graph structre
 // graph is adjacency list
 type Graph struct {
-	vertices []*Vertex
-
+	Rooms     []*Room
+	startRoom *Room
+	endRoom   *Room
 }
 
 // vertex represents graph vertex
-type Vertex struct{
-	key int
-	adjacent []*Vertex
+type Room struct {
+	Roomname string
+	adjacent map[string]*Room
 }
+
 // add vertext
-func (g *Graph) AddVertex(k int) {
-	g.vertices = append(g.vertices, &Vertex{key: k})
+func (g *Graph) AddRoom(name string) {
+	g.Rooms = append(g.Rooms, &Room{Roomname: name, adjacent: make(map[string]*Room)})
 }
+
 //add edge
 
-func (g *Graph) AddEdge(from,to int) {
-	// get vertex 
-	fromVertex := g.getVertex(from)
-	toVertex:= g.getVertex(to)
+func (g *Graph) AddLinks(from, to string) {
+	// get vertex
+	fromRoom := g.getRoom(from)
+	toRoom := g.getRoom(to)
 
-// check error
-if fromVertex == nil || toVertex == nil {
-		err := fmt.Errorf("invalid edge (%v ---> %v)", from, to)
+	// check
+	if fromRoom == nil || toRoom == nil {
+		err := fmt.Errorf("Room doesn't exsist (%v --- %v)", from, to)
 		fmt.Println(err.Error())
-} else if contains(fromVertex.adjacent, to) {
-		err := fmt.Errorf(" Exsisting edge (%v ---> %v)", from, to)
+	} else if contains(fromRoom.adjacent, to) || contains(toRoom.adjacent, from) {
+		err := fmt.Errorf(" Exsisting Link (%v --- %v)", from, to)
 		fmt.Println(err.Error())
 	} else {
-	//add edge
-		fromVertex.adjacent = append(fromVertex.adjacent, toVertex)
-}
-	
+		//add edRoom.adjacent = apRoom.adjacent, toRoom)
+		fromRoom.adjacent[toRoom.Roomname] = toRoom
+		toRoom.adjacent[fromRoom.Roomname] = fromRoom
+	}
 
-
 }
+
 // get vertex
-func (g *Graph) getVertex(k int) *Vertex {
-	for i,v:= range g.vertices {
-		if v.key == k{
-			return g.vertices[i]
+func (g *Graph) getRoom(name string) *Room {
+	for i, v := range g.Rooms {
+		if v.Roomname == name {
+			return g.Rooms[i]
 		}
 	}
 	return nil
 }
+
 // contains
-func contains(s []*Vertex, k int) bool {
-			for _,v := range s {
-				if k== v.key {
-					return true 
-				}
-			}
-			return false 
-}
-// print will print the adjacent list for each vertex of the graph 
-func (g *Graph) Print() {
-	for _, v := range g.vertices {
-			fmt.Printf("\nVertex %v: ", v.key)
-			for _, v := range v.adjacent {
-				fmt.Printf("%v", v.key)
-			}
+func contains(s map[string]*Room, name string) bool {
+	for _, v := range s {
+		if name == v.Roomname {
+			return true
+		}
 	}
+	return false
 }
 
 func main() {
-	Rooms, Links := SortFiles()
-	Links = FindDistances(Rooms, Links)
-	
-	test := &Graph{}
 
-	for i:= 0; i<5; i++ {
-		test.AddVertex(i)
-	}
-	test.Print()
-	test.AddEdge(1,2)
-}
+	list1 := []*Room{}
 
-func SortFiles() ([]Room, []Link){
-	file, _:= os.Open(os.Args[1])
-	scanner := bufio.NewScanner(file)
-	
-	scanner.Split(bufio.ScanLines)
-	
-	var Rooms []Room
- var Links []Link
-	for scanner.Scan(){
-		space := strings.Split(scanner.Text(), " ")
-		if len(space) > 1 {
-			//Roomname
-			newx, _:= strconv.ParseFloat(space[1], 64)
-			newy, _:= strconv.ParseFloat(space[2], 64)
-			NewRoom := Room {Roomname: space[0], x: newx, y: newy}
-			Rooms = append(Rooms, NewRoom)
-		} 
-		hyphen := strings.Split(scanner.Text(), "-")
+	roomList := &Graph{Rooms: list1}
 
-		if len(hyphen) > 1 {
-			//Link
-			NewLink := Link{startroom:hyphen[0], endroom:hyphen[1]}
-			Links = append(Links, NewLink)
-		} 
-	}
+	SortFiles(roomList)
 
-	return Rooms, Links
-}
-
-func FindDistances(Rooms []Room, Links []Link) []Link{
-	var x1 float64
-	var y1 float64
-	var x2 float64
-	var y2 float64
-
-for i,l := range Links{
-		for _,r := range Rooms {
-			if r.Roomname == l.startroom {
-				//x1, x2
-				x1 = r.x
-				y1 = r.y
-			}
-			if r.Roomname == l.endroom {
-				//x2, y2
-				x2 = r.x
-				y2 = r.y
-			}
-		}
-		distance:= lemin.DistanceCalc(x1,y1,x2,y2)
-		p:= &Links[i]
-		p.distance = distance
-	}
+	for _, r := range roomList.Rooms{
+		fmt.Println(r.Roomname)
+		fmt.Println(r.adjacent)
 		
-	return Links
+	}
+
+}
+
+func SortFiles(g *Graph) {
+	file, _ := os.Open(os.Args[1])
+	scanner := bufio.NewScanner(file)
+	start := false
+	end := false
+	i := 0
+
+	scanner.Split(bufio.ScanLines)
+
+	for scanner.Scan() {
+
+		space := strings.Split(scanner.Text(), " ")
+
+		if len(space) > 1 {
+			g.AddRoom(space[0])
+			i++
+		}
+
+		if start {
+			g.startRoom = g.Rooms[i]
+			start = false
+		} else if end {
+			g.endRoom = g.Rooms[i]
+			end = false
+		}
+
+		hyphen := strings.Split(scanner.Text(), "-")
+		if len(hyphen) > 1 {
+			g.AddLinks(hyphen[0], hyphen[1])
+			
+		}
+	}
+
+	if scanner.Text() == "##start" {
+		start = true
+	}
+
+	if scanner.Text() == "##end" {
+		end = true
+	}
+
 }
