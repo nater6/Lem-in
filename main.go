@@ -194,13 +194,16 @@ func SortFiles(g *Graph) {
 
 func FindPath(next, end string, g *Graph, path []string, pathList [][]string) {
 	pathList1 := pathList
+
 	if next == end {
 		// Add the end room to the slice
 		path = append(path, end)
 		fmt.Print("Path: ")
 		fmt.Println(path)
-		return 
+		return
+		
 	}
+
 	pathList1 = pathList
 	path1 := path
 
@@ -211,7 +214,13 @@ func FindPath(next, end string, g *Graph, path []string, pathList [][]string) {
 
 	// recurssively call the func to the end
 	for i := 0; i < len(curr.adjacent); i++ {
+		for _, v := range curr.adjacent{
+			if v == end {
+				curr.adjacent[i] = v
+			}
+		}
 		x := g.getRoom(curr.adjacent[i])
+		fmt.Println(x.Roomname)
 
 		if !x.visited {
 			fmt.Println("Next Room")
@@ -220,6 +229,6 @@ func FindPath(next, end string, g *Graph, path []string, pathList [][]string) {
 		}
 	}
 
-	curr.visited = true
+	
 	
 }
