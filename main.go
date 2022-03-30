@@ -58,7 +58,7 @@ func (g *Graph) AddLinks(from, to string) {
 	} else if fromRoom.Roomname != g.endRoom && toRoom.Roomname != g.endRoom {
 
 		fromRoom.adjacent = append(fromRoom.adjacent, toRoom.Roomname)
-		toRoom.adjacent = append(toRoom.adjacent, fromRoom.Roomname)
+		//toRoom.adjacent = append(toRoom.adjacent, fromRoom.Roomname)
 
 	}
 
@@ -193,20 +193,15 @@ func SortFiles(g *Graph) {
 }
 
 func FindPath(next, end string, g *Graph, path []string, pathList [][]string) {
-	pathList1 := pathList
 
 	if next == end {
 		// Add the end room to the slice
 		path = append(path, end)
-		fmt.Print("Path: ")
-		fmt.Println(path)
+		fmt.Printf("Path: %v", path)	
 		return
-		
 	}
 
-	pathList1 = pathList
 	path1 := path
-
 	curr := g.getRoom(next)
 
 	// Mark the room as visited
@@ -214,18 +209,14 @@ func FindPath(next, end string, g *Graph, path []string, pathList [][]string) {
 
 	// recurssively call the func to the end
 	for i := 0; i < len(curr.adjacent); i++ {
-		for _, v := range curr.adjacent{
-			if v == end {
-				curr.adjacent[i] = v
-			}
-		}
+
 		x := g.getRoom(curr.adjacent[i])
 		fmt.Println(x.Roomname)
 
 		if !x.visited {
 			fmt.Println("Next Room")
 			path1 = append(path1, next)
-			FindPath(x.Roomname, end, g, path1, pathList1)
+			FindPath(x.Roomname, end, g, path1, pathList)
 		}
 	}
 
