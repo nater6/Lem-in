@@ -58,7 +58,7 @@ func (g *Graph) AddLinks(from, to string) {
 	} else if fromRoom.Roomname != g.endRoom && toRoom.Roomname != g.endRoom {
 
 		fromRoom.adjacent = append(fromRoom.adjacent, toRoom.Roomname)
-		//toRoom.adjacent = append(toRoom.adjacent, fromRoom.Roomname)
+		toRoom.adjacent = append(toRoom.adjacent, fromRoom.Roomname)
 
 	}
 
@@ -111,38 +111,9 @@ func main() {
 	fmt.Println("endroom: " + roomList.endRoom)
 
 	FindPath(roomList.startRoom, roomList.endRoom, roomList, path, allPaths)
-
-	fmt.Println(allPaths)
 	
 
 }
-
-// func PathFinder(g *Graph) [][]*Room {
-
-// // 	//Begin from the start room and check which rooms it is linked to
-// 	start := g.startRoom
-// 	final := [][]*Room{}
-// 	path := []string{}
-
-// 	for start.adjacent != nil {
-// 		for i, v := range start.adjacent {
-// 			x := g.getRoom(v)
-// 			if !x.visited {
-// 				path = append(path, x.Roomname)
-// 				// 	//As each room is checked mark it as visited so it isn't checked again
-// 				start.visited = true
-// 				start = start.adjacent[i]
-// 			}
-// 		// if v == g.endRoom {
-// 		// 	final = append(final, path)
-// 		// }
-// 	}
-// 	}
-
-// // 	//Once a path is complete, run again
-// // 	// if the same path is found again,
-// 	return final
-// }
 
 func SortFiles(g *Graph) {
 	file, _ := os.Open(os.Args[1])
@@ -192,34 +163,66 @@ func SortFiles(g *Graph) {
 
 }
 
-func FindPath(next, end string, g *Graph, path []string, pathList [][]string) {
+func FindPath(current, end string, g *Graph, path []string, pathList [][]string) {
 
-	if next == end {
+	fmt.Println(current)
+
+
+
+	if current == end {
+		// for _, v := range g.Rooms{
+		// 	v.visited= false
+		// }
 		// Add the end room to the slice
 		path = append(path, end)
-		fmt.Printf("Path: %v", path)	
+		fmt.Printf("Path: %v", path)
+		fmt.Println()
+
 		return
 	}
+	
 
 	path1 := path
-	curr := g.getRoom(next)
+	curr := g.getRoom(current)
+	path1 = append(path1, current)
+
+	
 
 	// Mark the room as visited
 	curr.visited = true
+	anyAdj := false
+
+	for i:= 0; i< len(curr.adjacent); i++ {
+
+		y := g.getRoom(curr.adjacent[i])
+		if !y.visited {
+			anyAdj = true
+		}
+
+		if curr.adjacent[i]== g.endRoom {
+			curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
+
+		}
+	}
+
+	if !anyAdj {
+		curr.visited = false
+		return
+	}
 
 	// recurssively call the func to the end
 	for i := 0; i < len(curr.adjacent); i++ {
 
 		x := g.getRoom(curr.adjacent[i])
-		fmt.Println(x.Roomname)
 
-		if !x.visited {
-			fmt.Println("Next Room")
-			path1 = append(path1, next)
+		if x.visited {
+			x.visited = false
+			continue
+		} else if !x.visited {
+			// fmt.Println("Next Room")
+			
 			FindPath(x.Roomname, end, g, path1, pathList)
 		}
 	}
-
-	
-	
 }
+
