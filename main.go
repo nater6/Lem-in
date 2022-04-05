@@ -165,11 +165,14 @@ func SortFiles(g *Graph) {
 func FindPath(current, end string, g *Graph, path []string, pathList [][]string) {
 
 	fmt.Println("Current Room: " + current)
+	pathlist1 := pathList
+	fmt.Printf("All Paths %v \n", pathlist1)
 
 	//Check if the current room is the end room
 	if current == end {
 		path = append(path, end)
 		fmt.Printf("Path: %v \n", path)
+		pathlist1 = append(pathlist1, path)
 		return
 	}
 
@@ -222,7 +225,7 @@ func FindPath(current, end string, g *Graph, path []string, pathList [][]string)
 		} else if !x.visited {
 			// fmt.Println("Next Room")
 
-			FindPath(x.Roomname, end, g, path1, pathList)
+			FindPath(x.Roomname, end, g, path1, pathlist1)
 		}
 
 	}
