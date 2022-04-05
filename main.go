@@ -191,6 +191,7 @@ func FindPath(current, end string, g *Graph, path []string, pathList [][]string)
 			anyAdj = true
 		}
 
+		// If the end room is present in the adjacent room move it to the start of the slice
 		if curr.adjacent[i] == g.endRoom {
 			curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
 
@@ -204,12 +205,14 @@ func FindPath(current, end string, g *Graph, path []string, pathList [][]string)
 
 	// recurssively call the func to the end
 	for i := 0; i < len(curr.adjacent); i++ {
+		//When back at the startroom's adjacent rooms reset all rooms to unvisited
 		if curr.Roomname == g.startRoom {
 			for _, v := range g.Rooms {
 				v.visited = false
 			}
 		}
 
+		//Get information for the current room
 		x := g.getRoom(curr.adjacent[i])
 
 		if x.visited {
