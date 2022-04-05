@@ -101,7 +101,7 @@ func main() {
 	for _, v := range roomList.Rooms {
 		x := *v
 		fmt.Print(x.Roomname + "|")
-		
+
 	}
 	fmt.Println()
 
@@ -111,7 +111,6 @@ func main() {
 	fmt.Println("endroom: " + roomList.endRoom)
 
 	FindPath(roomList.startRoom, roomList.endRoom, roomList, path, allPaths)
-	
 
 }
 
@@ -165,41 +164,34 @@ func SortFiles(g *Graph) {
 
 func FindPath(current, end string, g *Graph, path []string, pathList [][]string) {
 
-	fmt.Println(current)
+	fmt.Println("Current Room: " + current)
 
-
-
+	//Check if the current room is the end room
 	if current == end {
-		// for _, v := range g.Rooms{
-		// 	v.visited= false
-		// }
-		// Add the end room to the slice
 		path = append(path, end)
-		fmt.Printf("Path: %v", path)
-		fmt.Println()
-
+		fmt.Printf("Path: %v \n", path)
 		return
 	}
-	
 
+	//Make new Path variable to append the current room to
 	path1 := path
 	curr := g.getRoom(current)
 	path1 = append(path1, current)
-
-	
 
 	// Mark the room as visited
 	curr.visited = true
 	anyAdj := false
 
-	for i:= 0; i< len(curr.adjacent); i++ {
+	//Loop through adjacent rooms and see if the end room is present or if there are any unvisited rooms
+	for i := 0; i < len(curr.adjacent); i++ {
 
 		y := g.getRoom(curr.adjacent[i])
+
 		if !y.visited {
 			anyAdj = true
 		}
 
-		if curr.adjacent[i]== g.endRoom {
+		if curr.adjacent[i] == g.endRoom {
 			curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
 
 		}
@@ -212,17 +204,24 @@ func FindPath(current, end string, g *Graph, path []string, pathList [][]string)
 
 	// recurssively call the func to the end
 	for i := 0; i < len(curr.adjacent); i++ {
+		if curr.Roomname == g.startRoom {
+			for _, v := range g.Rooms {
+				v.visited = false
+			}
+		}
 
 		x := g.getRoom(curr.adjacent[i])
 
 		if x.visited {
-			x.visited = false
+			//x.visited = false
+			fmt.Println("Previously visited: " + x.Roomname)
 			continue
 		} else if !x.visited {
 			// fmt.Println("Next Room")
-			
+
 			FindPath(x.Roomname, end, g, path1, pathList)
 		}
+
 	}
 }
 
