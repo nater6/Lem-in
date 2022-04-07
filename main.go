@@ -28,7 +28,6 @@ func (g *Graph) AddRoom(name string) {
 }
 
 //add edge
-
 func (g *Graph) AddLinks(from, to string) {
 	// get vertex
 	fromRoom := g.getRoom(from)
@@ -110,7 +109,8 @@ func main() {
 	fmt.Println("startroom: " + roomList.startRoom)
 	fmt.Println("endroom: " + roomList.endRoom)
 
-	FindPath(roomList.startRoom, roomList.endRoom, roomList, path, allPaths)
+	FindPath(roomList.startRoom, roomList.endRoom, roomList, path, &allPaths)
+	fmt.Println(allPaths)
 
 }
 
@@ -162,24 +162,23 @@ func SortFiles(g *Graph) {
 
 }
 
-func FindPath(current, end string, g *Graph, path []string, pathList [][]string) {
+func FindPath(current, end string, g *Graph, path []string, pathList *[][]string) {
 
 	fmt.Println("Current Room: " + current)
-	pathlist1 := pathList
-	fmt.Printf("All Paths %v \n", pathlist1)
 
 	//Check if the current room is the end room
 	if current == end {
 		path = append(path, end)
 		fmt.Printf("Path: %v \n", path)
-		pathlist1 = append(pathlist1, path)
-		return
+		*pathList = append(*pathList, path)
+		
 	}
 
 	//Make new Path variable to append the current room to
 	path1 := path
 	curr := g.getRoom(current)
 	path1 = append(path1, current)
+	path = append(path, current)
 
 	// Mark the room as visited
 	curr.visited = true
@@ -224,10 +223,8 @@ func FindPath(current, end string, g *Graph, path []string, pathList [][]string)
 			continue
 		} else if !x.visited {
 			// fmt.Println("Next Room")
-
-			FindPath(x.Roomname, end, g, path1, pathlist1)
+			FindPath(x.Roomname, end, g, path, pathList)
 		}
 
 	}
 }
-
