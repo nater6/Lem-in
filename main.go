@@ -108,6 +108,7 @@ func main() {
 	path := []string{}
 	fmt.Println("startroom: " + roomList.startRoom)
 	fmt.Println("endroom: " + roomList.endRoom)
+	
 
 	FindPath(roomList.startRoom, roomList.endRoom, roomList, path, &allPaths)
 	fmt.Println(allPaths)
@@ -168,17 +169,20 @@ func FindPath(current, end string, g *Graph, path []string, pathList *[][]string
 
 	//Check if the current room is the end room
 	if current == end {
+		fmt.Printf("PathList before : %v \n", pathList)
 		path = append(path, end)
-		fmt.Printf("Path: %v \n", path)
+		fmt.Printf("Path: %v ", path)
 		*pathList = append(*pathList, path)
-		
+		fmt.Printf("Path appended: %v \n", pathList)
+		return
+
 	}
 
 	//Make new Path variable to append the current room to
 	path1 := path
 	curr := g.getRoom(current)
 	path1 = append(path1, current)
-	path = append(path, current)
+	//path = append(path, current)
 
 	// Mark the room as visited
 	curr.visited = true
@@ -223,8 +227,9 @@ func FindPath(current, end string, g *Graph, path []string, pathList *[][]string
 			continue
 		} else if !x.visited {
 			// fmt.Println("Next Room")
-			FindPath(x.Roomname, end, g, path, pathList)
+			FindPath(x.Roomname, end, g, path1, pathList)
 		}
+		
 
 	}
 }
