@@ -104,8 +104,8 @@ func main() {
 	}
 	fmt.Println()
 
-	allPaths := [][]string{}
-	path := []string{}
+	allPaths := []string{}
+	var path string
 	fmt.Println("startroom: " + roomList.startRoom)
 	fmt.Println("endroom: " + roomList.endRoom)
 
@@ -162,77 +162,73 @@ func SortFiles(g *Graph) {
 
 }
 
-func FindPath(current, end string, g *Graph, path []string, pathList *[][]string) {
+func FindPath(current, end string, g *Graph, path string, pathList *[]string) {
+    //Make new Path variable to append the current room to
+    fmt.Println("Current Room: " + current)
+        
+    //Check if the current room is the end room
+    curr := g.getRoom(current)
+    fmt.Printf("Pathlist before: %v \n", pathList)
+    
+    path = path + current + " "
+    fmt.Printf("PathList after: %v \n", pathList)
 
-	fmt.Println("Current Room: " + current)
-	fmt.Printf("PathList for %v : %v \n", current, pathList)
+    if current == end {
+        fmt.Printf("Path: %v \n", path)
+        *pathList = append(*pathList, path)
+        fmt.Printf("appended PathList: %v \n", pathList)
+        
+    }
 
-	//Check if the current room is the end room
-	if current == end {
-		fmt.Printf("PathList before : %v \n", pathList)
-		path = append(path, end)
-		fmt.Printf("Path: %v ", path)
-		*pathList = append(*pathList, path)
-		fmt.Printf("Path appended: %v \n", pathList)
+    
+    
+    
+
+    // Mark the room as visited
+    curr.visited = true
+    anyAdj := false
+
+    //Loop through adjacent rooms and see if the end room is present or if there are any unvisited rooms
+    for i := 0; i < len(curr.adjacent); i++ {
+
+        y := g.getRoom(curr.adjacent[i])
+
+        if !y.visited {
+            anyAdj = true
+        }
+
+        // If the end room is present in the adjacent room move it to the start of the slice
+        if curr.adjacent[i] == g.endRoom {
+            curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
+
+        }
+    }
+
+    if !anyAdj {
+        curr.visited = false
+        return
+    }
+
+    // recurssively call the func to the end
+    for i := 0; i < len(curr.adjacent); i++ {
+        //When back at the startroom's adjacent rooms reset all rooms to unvisited
+        if curr.Roomname == g.startRoom {
+            for _, v := range g.Rooms {
+                v.visited = false
+            }
+        }
+
+        //Get information for the current room
+        x := g.getRoom(curr.adjacent[i])
+        fmt.Println("Current adjacent Room: " + x.Roomname)
+
+        if x.visited {
+            //x.visited = false
+            fmt.Println("Previously visited: " + x.Roomname)
+            continue
+        } else if !x.visited {
+            // fmt.Println("Next Room")
+            FindPath(x.Roomname, end, g, path, pathList)
+        }
 	}
-
-	//Make new Path variable to append the current room to
-	//path1 := path
-	curr := g.getRoom(current)
-	fmt.Printf("Pathlist check -1.5: %v \n", pathList)
-	//path1 = append(path1, current)
-	path = append(path, current)
-		fmt.Println(path)
-
-	fmt.Printf("Pathlist check -1: %v \n", pathList)
-
-	// Mark the room as visited
-	curr.visited = true
-	anyAdj := false
-
-	//Loop through adjacent rooms and see if the end room is present or if there are any unvisited rooms
-	for i := 0; i < len(curr.adjacent); i++ {
-
-		y := g.getRoom(curr.adjacent[i])
-
-		if !y.visited {
-			anyAdj = true
-		}
-
-		// If the end room is present in the adjacent room move it to the start of the slice
-		if curr.adjacent[i] == g.endRoom {
-			curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
-
-		}
-	}
-
-	if !anyAdj {
-		curr.visited = false
-		return
-	}
-
-	// recurssively call the func to the end
-	for i := 0; i < len(curr.adjacent); i++ {
-		//When back at the startroom's adjacent rooms reset all rooms to unvisited
-		if curr.Roomname == g.startRoom {
-			for _, v := range g.Rooms {
-				v.visited = false
-			}
-		}
-		
-		//Get information for the current room
-		x := g.getRoom(curr.adjacent[i])
-
-		if x.visited {
-			//x.visited = false
-			fmt.Println("Previously visited: " + x.Roomname)
-			continue
-		} else if !x.visited {
-			// fmt.Println("Next Room")
-
-			FindPath(x.Roomname, end, g, path, pathList)
-		}
-
-	}
-	fmt.Println("End Room!")
 }
