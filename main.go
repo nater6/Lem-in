@@ -170,7 +170,10 @@ func FindPath(current, end string, g *Graph, path string, pathList *[]string) {
     curr := g.getRoom(current)
     fmt.Printf("Pathlist before: %v \n", pathList)
     
-    path = path + current + " "
+	if !(curr.Roomname == g.startRoom) {
+ 		path = path + current  
+	} 
+    
     fmt.Printf("PathList after: %v \n", pathList)
 
     if current == end {
