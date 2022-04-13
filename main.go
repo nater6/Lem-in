@@ -161,6 +161,7 @@ func SortFiles(g *Graph) {
 	}
 
 }
+type Array []string
 
 func FindPath(current, end string, g *Graph, path string, pathList *[]string) {
     //Make new Path variable to append the current room to
@@ -173,7 +174,8 @@ func FindPath(current, end string, g *Graph, path string, pathList *[]string) {
 		path = path + current
 	} else if !(curr.Roomname == g.startRoom) {
  		path = path + current + "-"  
-	} 
+	}
+	
 	fmt.Println("Path: " + path)
     
 
