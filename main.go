@@ -168,24 +168,21 @@ func FindPath(current, end string, g *Graph, path string, pathList *[]string) {
         
     //Check if the current room is the end room
     curr := g.getRoom(current)
-    fmt.Printf("Pathlist before: %v \n", pathList)
     
-	if !(curr.Roomname == g.startRoom) {
- 		path = path + current  
+	if curr.Roomname== g.endRoom{
+		path = path + current
+	} else if !(curr.Roomname == g.startRoom) {
+ 		path = path + current + "-"  
 	} 
+	fmt.Println("Path: " + path)
     
-    fmt.Printf("PathList after: %v \n", pathList)
 
     if current == end {
         fmt.Printf("Path: %v \n", path)
         *pathList = append(*pathList, path)
         fmt.Printf("appended PathList: %v \n", pathList)
         
-    }
-
-    
-    
-    
+    } 
 
     // Mark the room as visited
     curr.visited = true
