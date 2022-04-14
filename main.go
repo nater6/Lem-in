@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//graph structre
+//graph structure
 // graph is adjacency list
 type Graph struct {
 	Rooms     []*Room
@@ -161,76 +161,76 @@ func SortFiles(g *Graph) {
 	}
 
 }
+
 type Array []string
 
 func FindPath(current, end string, g *Graph, path string, pathList *[]string) {
-    //Make new Path variable to append the current room to
-    fmt.Println("Current Room: " + current)
-        
-    //Check if the current room is the end room
-    curr := g.getRoom(current)
-    
-	if curr.Roomname== g.endRoom{
+	//Make new Path variable to append the current room to
+	fmt.Println("Current Room: " + current)
+
+	//Check if the current room is the end room
+	curr := g.getRoom(current)
+
+	if curr.Roomname == g.endRoom {
 		path = path + current
 	} else if !(curr.Roomname == g.startRoom) {
- 		path = path + current + "-"  
+		path = path + current + "-"
 	}
-	
+
 	fmt.Println("Path: " + path)
-    
 
-    if current == end {
-        fmt.Printf("Path: %v \n", path)
-        *pathList = append(*pathList, path)
-        fmt.Printf("appended PathList: %v \n", pathList)
-        
-    } 
+	if current == end {
+		fmt.Printf("Path: %v \n", path)
+		*pathList = append(*pathList, path)
+		fmt.Printf("appended PathList: %v \n", pathList)
 
-    // Mark the room as visited
-    curr.visited = true
-    anyAdj := false
+	}
 
-    //Loop through adjacent rooms and see if the end room is present or if there are any unvisited rooms
-    for i := 0; i < len(curr.adjacent); i++ {
+	// Mark the room as visited
+	curr.visited = true
+	anyAdj := false
 
-        y := g.getRoom(curr.adjacent[i])
+	//Loop through adjacent rooms and see if the end room is present or if there are any unvisited rooms
+	for i := 0; i < len(curr.adjacent); i++ {
 
-        if !y.visited {
-            anyAdj = true
-        }
+		y := g.getRoom(curr.adjacent[i])
 
-        // If the end room is present in the adjacent room move it to the start of the slice
-        if curr.adjacent[i] == g.endRoom {
-            curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
+		if !y.visited {
+			anyAdj = true
+		}
 
-        }
-    }
+		// If the end room is present in the adjacent room move it to the start of the slice
+		if curr.adjacent[i] == g.endRoom {
+			curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
 
-    if !anyAdj {
-        curr.visited = false
-        return
-    }
+		}
+	}
 
-    // recurssively call the func to the end
-    for i := 0; i < len(curr.adjacent); i++ {
-        //When back at the startroom's adjacent rooms reset all rooms to unvisited
-        if curr.Roomname == g.startRoom {
-            for _, v := range g.Rooms {
-                v.visited = false
-            }
-        }
+	if !anyAdj {
+		curr.visited = false
+		return
+	}
 
-        //Get information for the current room
-        x := g.getRoom(curr.adjacent[i])
-        fmt.Println("Current adjacent Room: " + x.Roomname)
+	// recurssively call the func to the end
+	for i := 0; i < len(curr.adjacent); i++ {
+		//When back at the startroom's adjacent rooms reset all rooms to unvisited
+		if curr.Roomname == g.startRoom {
+			for _, v := range g.Rooms {
+				v.visited = false
+			}
+		}
 
-        if x.visited {
-            //x.visited = false
-            fmt.Println("Previously visited: " + x.Roomname)
-            continue
-        } else if !x.visited {
-            // fmt.Println("Next Room")
-            FindPath(x.Roomname, end, g, path, pathList)
-        }
+		//Get information for the current room
+		x := g.getRoom(curr.adjacent[i])
+		fmt.Println("Current adjacent Room: " + x.Roomname)
+
+		if x.visited {
+			//x.visited = false
+			fmt.Println("Previously visited: " + x.Roomname)
+			continue
+		} else if !x.visited {
+			// fmt.Println("Next Room")
+			FindPath(x.Roomname, end, g, path, pathList)
+		}
 	}
 }
