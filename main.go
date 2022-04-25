@@ -103,14 +103,106 @@ func main() {
 
 	}
 	fmt.Println()
-
-	allPaths := []string{}
-	var path string
 	fmt.Println("startroom: " + roomList.startRoom)
 	fmt.Println("endroom: " + roomList.endRoom)
 
-	FindPath(roomList.startRoom, roomList.endRoom, roomList, path, &allPaths)
-	fmt.Println(allPaths)
+	//Run the DFS path search
+	allPathsDFS := []string{}
+	allPathsBFS := []string{}
+	var path string
+	DFS(roomList.startRoom, roomList.endRoom, roomList, path, &allPathsDFS)
+	fmt.Println(allPathsDFS)
+
+	//Run the Shortest path search
+	list2 := []*Room{}
+	roomList1 := &Graph{Rooms: list2}
+	SortFiles(roomList1)
+
+	BFS(roomList1.startRoom, roomList1.endRoom, roomList1, &allPathsBFS, ShortestPath)
+	fmt.Println(allPathsBFS)
+
+	//Sort the path lists in order
+
+	lenSorter(&allPathsBFS)
+	lenSorter(&allPathsDFS)
+	fmt.Printf("\nPRINTING DFS PATHS: %v\n", allPathsDFS)
+	fmt.Printf("\nPRINTING BFS PATHS: %v\n", allPathsBFS)
+
+	//Send ants using the function
+
+}
+
+func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, start string, end string, path Array) Array) {
+
+	begin := g.getRoom(start)
+
+	if len(begin.adjacent) == 2 {
+		begin.adjacent[0], begin.adjacent[1] = begin.adjacent[1], begin.adjacent[0]
+	}
+
+	for i := 0; i < len(begin.adjacent); i++ {
+
+		fmt.Printf("ROUND NUMBER: %d", i)
+		var shortPath Array
+
+		//Find all possible paths with unvisited rooms
+		ShortestPath(g, g.startRoom, g.endRoom, shortPath)
+
+		// Get the value string of the shortest path
+		fmt.Printf("PATH ARRAY!!!!: %v \n", pathArray)
+		var shortStorer string
+		if len(pathArray) != 0 {
+			shortStorer = pathArray[0]
+		}
+
+		for _, v := range pathArray {
+			if len(v) < len(shortStorer) {
+				shortStorer = v
+			}
+		}
+
+		//Remove the sqr brackes form the string
+		if len(pathArray) != 0 {
+			shortStorer = shortStorer[1 : len(shortStorer)-1]
+		}
+
+		//Mark the rooms in the path as visited
+
+		shortStorerSlc := strings.Split(shortStorer, " ")
+		shortStorerSlc = shortStorerSlc[1:]
+
+		fmt.Printf("\n                   ShortStORERSSS: %v \n", shortStorerSlc)
+		//Loop through the path and mark as visited
+		for z := 0; z < len(shortStorerSlc)-1; z++ {
+			g.getRoom(shortStorerSlc[z]).visited = true
+		}
+		fmt.Printf("PATH TO BE APPENDED: %v \n", shortStorerSlc)
+
+		var pathStr string
+		if len(shortStorerSlc) != 0 {
+			for i := 0; i < len(shortStorerSlc); i++ {
+				if i == len(shortStorerSlc)-1 {
+					pathStr += shortStorerSlc[i]
+				} else {
+					pathStr = pathStr + shortStorerSlc[i] + "-"
+				}
+			}
+		}
+
+		if len(pathStr) != 0 {
+			containing := false
+			for _, v := range *paths {
+				if v == pathStr {
+					containing = true
+				}
+			}
+			if !containing {
+				*paths = append(*paths, pathStr)
+			}
+		}
+
+		pathArray = []string{}
+	}
 
 }
 
@@ -161,78 +253,131 @@ func SortFiles(g *Graph) {
 	}
 
 }
-type Array []string
 
-func FindPath(current, end string, g *Graph, path string, pathList *[]string) {
-    //Make new Path variable to append the current room to
-    fmt.Println("Current Room: " + current)
-        
-    //Check if the current room is the end room
-    curr := g.getRoom(current)
-    
-	if curr.Roomname== g.endRoom{
-		path = path + current
-	} else if !(curr.Roomname == g.startRoom) {
- 		path = path + current + "-"  
+func DFS(current, end string, g *Graph, path string, pathList *[]string) {
+	//Get the pointer and all information for the current room
+	fmt.Println("Current Room: " + current)
+
+	//Check if the current room is the end room
+	curr := g.getRoom(current)
+	fmt.Printf("current adj list: %v", curr.adjacent)
+
+	if current != end {
+		curr.visited = true
 	}
-	
+
+	if curr.Roomname == g.endRoom {
+		path += current
+	} else if !(curr.Roomname == g.startRoom) {
+		path += current + "-"
+	}
+
 	fmt.Println("Path: " + path)
-    
 
-    if current == end {
-        fmt.Printf("Path: %v \n", path)
-        *pathList = append(*pathList, path)
-        fmt.Printf("appended PathList: %v \n", pathList)
-        
-    } 
+	//Create bool var to to be true if the current room == end
+	final := false
 
-    // Mark the room as visited
-    curr.visited = true
-    anyAdj := false
+	if current == end {
+		fmt.Printf("Path 123: %v \n", path)
 
-    //Loop through adjacent rooms and see if the end room is present or if there are any unvisited rooms
-    for i := 0; i < len(curr.adjacent); i++ {
+		*pathList = append(*pathList, path)
+		fmt.Printf("appended PathList: %v \n", pathList)
+		path = ""
 
-        y := g.getRoom(curr.adjacent[i])
+		final = true
 
-        if !y.visited {
-            anyAdj = true
-        }
+		for i := 0; i < len(g.getRoom(g.startRoom).adjacent); i++ {
+			fmt.Println("Current value: " + g.getRoom(g.startRoom).adjacent[i])
+			if g.getRoom(g.startRoom).adjacent[i] == g.endRoom {
+				g.getRoom(g.startRoom).adjacent[i] = ""
+				fmt.Println("End Removed")
+			}
+		}
+		fmt.Println(g.getRoom(g.startRoom).adjacent)
 
-        // If the end room is present in the adjacent room move it to the start of the slice
-        if curr.adjacent[i] == g.endRoom {
-            curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
+	}
 
-        }
-    }
+	if final {
+		DFS(g.startRoom, end, g, path, pathList)
+	}
 
-    if !anyAdj {
-        curr.visited = false
-        return
-    }
+	//Loop through adjacent rooms and see if the end room is present or if there are any unvisited rooms
+	for i := 0; i < len(curr.adjacent); i++ {
 
-    // recurssively call the func to the end
-    for i := 0; i < len(curr.adjacent); i++ {
-        //When back at the startroom's adjacent rooms reset all rooms to unvisited
-        if curr.Roomname == g.startRoom {
-            for _, v := range g.Rooms {
-                v.visited = false
-            }
-        }
+		// If the end room is present in the adjacent room move it to the start of the slice
+		if curr.adjacent[i] == g.endRoom {
+			curr.adjacent[0], curr.adjacent[i] = curr.adjacent[i], curr.adjacent[0]
+		}
+	}
 
-        //Get information for the current room
-        x := g.getRoom(curr.adjacent[i])
-        fmt.Println("Current adjacent Room: " + x.Roomname)
+	// recurssively call the func to the end
+	for i := 0; i < len(curr.adjacent); i++ {
+		if curr.adjacent[i] == "" {
+			continue
+		}
+		//Get information for the current room
+		x := g.getRoom(curr.adjacent[i])
+		fmt.Println("Current adjacent Room: " + x.Roomname)
 
-        if x.visited {
-            //x.visited = false
-            fmt.Println("Previously visited: " + x.Roomname)
-            continue
-        } else if !x.visited {
-            // fmt.Println("Next Room")
-            FindPath(x.Roomname, end, g, path, pathList)
-        }
+		if x.visited {
+			fmt.Println("Previously visited: " + x.Roomname)
+			continue
+		} else {
+			DFS(x.Roomname, end, g, path, pathList)
+		}
 	}
 }
 
-func DFSPathFinder(current,end string, g *Graph, path string, result *[]string)
+type Array []string
+
+var pathArray Array
+
+func (arr Array) hasPropertyOf(str string) bool {
+	for _, v := range arr {
+		if str == v {
+			return true
+		}
+	}
+	return false
+}
+
+func ShortestPath(graph *Graph, start string, end string, path Array) Array {
+	path = append(path, start)
+	if start == end {
+		return path
+	}
+	shortest := make([]string, 0)
+	for _, node := range graph.getRoom(start).adjacent {
+		if !path.hasPropertyOf(node) && !graph.isVisited(node) {
+			newPath := ShortestPath(graph, node, end, path)
+			if len(newPath) > 0 {
+				if newPath.hasPropertyOf(graph.startRoom) && newPath.hasPropertyOf(end) {
+					fmt.Printf("\n New Path: %v \n", newPath)
+					pathArray = append(pathArray, fmt.Sprint(newPath))
+					if len(shortest) == 0 || (len(newPath) < len(shortest)) {
+
+						shortest = newPath
+					}
+				}
+			}
+		}
+	}
+	return shortest
+}
+
+func (graph *Graph) isVisited(str string) bool {
+	return graph.getRoom(str).visited
+}
+
+func lenSorter(paths *[]string) {
+
+	x := *paths
+	for i := 0; i < len(x); i++ {
+		for j := 0; j < len(x); j++ {
+			if len(x[i]) < len(x[j]) {
+				x[i], x[j] = x[j], x[i]
+			}
+		}
+	}
+	*paths = x
+}
