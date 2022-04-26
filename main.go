@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -13,6 +14,7 @@ type Graph struct {
 	Rooms     []*Room
 	startRoom string
 	endRoom   string
+	ants      int
 }
 
 // vertex represents graph vertex
@@ -129,6 +131,9 @@ func main() {
 	fmt.Printf("\nPRINTING BFS PATHS: %v\n", allPathsBFS)
 
 	//Send ants using the function
+	antNum := roomList.ants
+
+	AntSender(antNum, allPathsDFS)
 
 }
 
@@ -212,12 +217,17 @@ func SortFiles(g *Graph) {
 	start := false
 	end := false
 	i := 0
+	firstLine := true
 
 	scanner.Split(bufio.ScanLines)
 
 	for scanner.Scan() {
 		x := scanner.Text()
 		fmt.Println(x)
+		if firstLine {
+			g.ants, _ = strconv.Atoi(x)
+			firstLine = false
+		}
 
 		space := strings.Split(scanner.Text(), " ")
 
@@ -233,6 +243,7 @@ func SortFiles(g *Graph) {
 			g.endRoom = g.Rooms[i-1].Roomname
 			end = false
 		}
+
 		hyphen := strings.Split(scanner.Text(), "-")
 		if len(hyphen) > 1 {
 			g.AddLinks(hyphen[0], hyphen[1])
@@ -379,4 +390,92 @@ func lenSorter(paths *[]string) {
 		}
 	}
 	*paths = x
+}
+
+func AntSender(n int, pathList []string) {
+	pathListStore := [][]string{}
+
+	for _, v := range pathList {
+		s := strings.Split(v, "-")
+		pathListStore = append(pathListStore, s)
+	}
+
+	lenP := len(pathList)
+
+	queue := make([][]string, lenP)
+
+	x := 0
+
+	for i := 1; i <= n; i++ {
+		ant := strconv.Itoa(i)
+
+		if x == lenP-1 {
+			if len(pathListStore[x])+len(queue[x]) <= len(pathListStore[0])+len(queue[0]) {
+				queue[x] = append(queue[x], ant)
+			} else {
+				x = 0
+				queue[x] = append(queue[x], ant)
+			}
+
+		} else {
+			if len(pathListStore[x])+len(queue[x]) <= len(pathListStore[x+1])+len(queue[x+1]) {
+				queue[x] = append(queue[x], ant)
+			} else {
+				x++
+				queue[x] = append(queue[x], ant)
+
+			}
+		}
+	}
+	fmt.Printf("\nPathList: %v\n", pathListStore)
+	fmt.Printf("\nQUEUE: %v\n", queue)
+
+	longest := len(queue[0])
+
+	for i := 0; i < len(queue); i++ {
+		if len(queue[i]) > longest {
+			longest = len(queue[i])
+		}
+	}
+
+	order := []int{}
+
+	for j := 0; j < longest; j++ {
+		for i := 0; i < len(queue); i++ {
+			if j < len(queue[i]) {
+				x, _ = strconv.Atoi(queue[i][j])
+				order = append(order, x)
+			}
+		}
+	}
+	fmt.Println(order)
+	//Apply to ant mover function to each ant in the order list
+	pathNum := 0
+	allMoves := [][]string{}
+	for _ , num := range order {
+		if pathNum == len(pathListStore){
+			pathNum = 0
+		}
+		allMoves = append(allMoves, AntMover(num, pathListStore[pathNum]))
+		pathNum++
+	}
+
+	fmt.Println(allMoves)
+	// finalPrint := []string{}
+
+	//Loop through all 
+	for i:=0; i<len(allMoves); i++{
+
+	}
+
+}
+
+func AntMover(n int, path []string) []string {
+	antRooms := []string{}
+	x := strconv.Itoa(n)
+	for i := 0; i < len(path); i++ {
+		str := "L"+x+"-"+ path[i] 
+		antRooms = append(antRooms, str)
+	}
+	return antRooms
 }
