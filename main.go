@@ -233,7 +233,6 @@ func SortFiles(g *Graph) {
 			g.endRoom = g.Rooms[i-1].Roomname
 			end = false
 		}
-
 		hyphen := strings.Split(scanner.Text(), "-")
 		if len(hyphen) > 1 {
 			g.AddLinks(hyphen[0], hyphen[1])
