@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -87,33 +88,32 @@ func contains(s []string, name string) bool {
 
 func main() {
 
+	
+
 	list1 := []*Room{}
 
 	roomList := &Graph{Rooms: list1}
+	
 
-	SortFiles(roomList)
+	 if err := SortFiles(roomList); err!= nil {
+		fmt.Print(err) 
+		return
+	 }
 
-	for _, r := range roomList.Rooms {
-		fmt.Println(r.Roomname)
-		fmt.Println(r.adjacent)
+	file, _ := os.Open(os.Args[1])
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
 
+	for scanner.Scan(){
+		x  := scanner.Text()
+		fmt.Println(x)
 	}
-
-	for _, v := range roomList.Rooms {
-		x := *v
-		fmt.Print(x.Roomname + "|")
-
-	}
-	fmt.Println()
-	fmt.Println("startroom: " + roomList.startRoom)
-	fmt.Println("endroom: " + roomList.endRoom)
 
 	//Run the DFS path search
 	allPathsDFS := []string{}
 	allPathsBFS := []string{}
 	var path string
 	DFS(roomList.startRoom, roomList.endRoom, roomList, path, &allPathsDFS)
-	fmt.Println(allPathsDFS)
 
 	//Run the Shortest path search
 	list2 := []*Room{}
@@ -121,14 +121,11 @@ func main() {
 	SortFiles(roomList1)
 
 	BFS(roomList1.startRoom, roomList1.endRoom, roomList1, &allPathsBFS, ShortestPath)
-	fmt.Println(allPathsBFS)
-
-	//Sort the path lists in order
+		//Sort the path lists in order
 
 	lenSorter(&allPathsBFS)
 	lenSorter(&allPathsDFS)
-	fmt.Printf("\nPRINTING DFS PATHS: %v\n", allPathsDFS)
-	fmt.Printf("\nPRINTING BFS PATHS: %v\n", allPathsBFS)
+	
 
 	//Send ants using the function
 	antNum := roomList.ants
@@ -143,7 +140,7 @@ func main() {
 	} else {
 		Printer = BFSSearch
 	}
-
+	fmt.Println()
 	for _, step := range Printer {
 		fmt.Println(step)
 	}
@@ -160,14 +157,13 @@ func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, star
 
 	for i := 0; i < len(begin.adjacent); i++ {
 
-		fmt.Printf("ROUND NUMBER: %d", i)
+		
 		var shortPath Array
 
 		//Find all possible paths with unvisited rooms
 		ShortestPath(g, g.startRoom, g.endRoom, shortPath)
 
 		// Get the value string of the shortest path
-		fmt.Printf("PATH ARRAY!!!!: %v \n", pathArray)
 		var shortStorer string
 		if len(pathArray) != 0 {
 			shortStorer = pathArray[0]
@@ -189,12 +185,10 @@ func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, star
 		shortStorerSlc := strings.Split(shortStorer, " ")
 		shortStorerSlc = shortStorerSlc[1:]
 
-		fmt.Printf("\n                   ShortStORERSSS: %v \n", shortStorerSlc)
 		//Loop through the path and mark as visited
 		for z := 0; z < len(shortStorerSlc)-1; z++ {
 			g.getRoom(shortStorerSlc[z]).visited = true
 		}
-		fmt.Printf("PATH TO BE APPENDED: %v \n", shortStorerSlc)
 
 		var pathStr string
 		if len(shortStorerSlc) != 0 {
@@ -224,7 +218,7 @@ func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, star
 
 }
 
-func SortFiles(g *Graph) {
+func SortFiles(g *Graph) error {
 	file, _ := os.Open(os.Args[1])
 	scanner := bufio.NewScanner(file)
 	start := false
@@ -236,9 +230,11 @@ func SortFiles(g *Graph) {
 
 	for scanner.Scan() {
 		x := scanner.Text()
-		fmt.Println(x)
 		if firstLine {
 			g.ants, _ = strconv.Atoi(x)
+			if g.ants == 0{
+				return errors.New("ERROR: invalid data format")
+			}
 			firstLine = false
 		}
 
@@ -259,14 +255,16 @@ func SortFiles(g *Graph) {
 
 		hyphen := strings.Split(scanner.Text(), "-")
 		if len(hyphen) > 1 {
+			if hyphen[0] == hyphen[1] {
+				return errors.New("ERROR: invalid data format")
+				
+			}
 			g.AddLinks(hyphen[0], hyphen[1])
 
 		}
 
 		if x == "##start" {
 			start = true
-			fmt.Println("Start")
-
 		}
 
 		if x == "##end" {
@@ -274,16 +272,15 @@ func SortFiles(g *Graph) {
 		}
 
 	}
+	return nil
 
 }
 
 func DFS(current, end string, g *Graph, path string, pathList *[]string) {
-	//Get the pointer and all information for the current room
-	fmt.Println("Current Room: " + current)
+	//Get the pointer and all information for the current roo
 
 	//Check if the current room is the end room
 	curr := g.getRoom(current)
-	fmt.Printf("current adj list: %v", curr.adjacent)
 
 	if current != end {
 		curr.visited = true
@@ -295,28 +292,21 @@ func DFS(current, end string, g *Graph, path string, pathList *[]string) {
 		path += current + "-"
 	}
 
-	fmt.Println("Path: " + path)
-
 	//Create bool var to to be true if the current room == end
 	final := false
 
 	if current == end {
-		fmt.Printf("Path 123: %v \n", path)
 
 		*pathList = append(*pathList, path)
-		fmt.Printf("appended PathList: %v \n", pathList)
 		path = ""
 
 		final = true
 
 		for i := 0; i < len(g.getRoom(g.startRoom).adjacent); i++ {
-			fmt.Println("Current value: " + g.getRoom(g.startRoom).adjacent[i])
 			if g.getRoom(g.startRoom).adjacent[i] == g.endRoom {
 				g.getRoom(g.startRoom).adjacent[i] = ""
-				fmt.Println("End Removed")
 			}
 		}
-		fmt.Println(g.getRoom(g.startRoom).adjacent)
 
 	}
 
@@ -340,10 +330,8 @@ func DFS(current, end string, g *Graph, path string, pathList *[]string) {
 		}
 		//Get information for the current room
 		x := g.getRoom(curr.adjacent[i])
-		fmt.Println("Current adjacent Room: " + x.Roomname)
 
 		if x.visited {
-			fmt.Println("Previously visited: " + x.Roomname)
 			continue
 		} else {
 			DFS(x.Roomname, end, g, path, pathList)
@@ -375,7 +363,6 @@ func ShortestPath(graph *Graph, start string, end string, path Array) Array {
 			newPath := ShortestPath(graph, node, end, path)
 			if len(newPath) > 0 {
 				if newPath.hasPropertyOf(graph.startRoom) && newPath.hasPropertyOf(end) {
-					fmt.Printf("\n New Path: %v \n", newPath)
 					pathArray = append(pathArray, fmt.Sprint(newPath))
 					if len(shortest) == 0 || (len(newPath) < len(shortest)) {
 
@@ -440,8 +427,6 @@ func AntSender(n int, pathList []string) []string {
 			}
 		}
 	}
-	fmt.Printf("\nPathList: %v\n", pathListStore)
-	fmt.Printf("\nQUEUE: %v\n", queue)
 
 	longest := len(queue[0])
 
@@ -461,7 +446,6 @@ func AntSender(n int, pathList []string) []string {
 			}
 		}
 	}
-	fmt.Printf("ORDER: %v", order)
 
 	container := make([][][]string, len(queue))
 
@@ -477,8 +461,6 @@ func AntSender(n int, pathList []string) []string {
 
 		}
 	}
-
-	fmt.Printf("\n\nCONTAINER!!!!!!!!!!!!!!!!!!!!!!!!111 %v\n\n", container)
 	finalMoves := []string{}
 
 	for _, paths := range container {
@@ -508,81 +490,3 @@ func AntMover(n int, path []string) []string {
 	}
 	return antRooms
 }
-
-//Apply to ant mover function to each ant in the order list
-// pathNum := 0
-// allMoves := [][]string{}
-// change := 1
-// track := 0
-// for i, num := range order {
-// 	fmt.Printf("\nALL MOVES%d :  %v \n", i, allMoves)
-// 	fmt.Printf("\n Track == %v || Change == %d || i == %d\n", track, change, i)
-
-// 	if len(queue[len(queue)-change]) == track {
-// 		change++
-// 		fmt.Printf("\n CHANGED!!!| CHANGE = %d | i = %d | track = %d | len of PAthListSTORE = %d \n", change, i, track, len(pathListStore))
-// 		track = 0
-// 	} else if i%(len(pathListStore)-change+1) == 0 && i != 0 {
-// 		track++
-// 		fmt.Printf("\nTrack Increased!!!!!!!!!!!!! Track == %d\n", track)
-
-// 	}
-
-// 	if pathNum == len(pathListStore)-change+1 {
-// 		fmt.Println("PATHNUM CHANGED")
-// 		pathNum = 0
-// 	}
-
-// 	fmt.Printf("\nANT: %v || PathNum: %d\n", num, pathNum)
-// 	allMoves = append(allMoves, AntMover(num, pathListStore[pathNum]))
-// 	pathNum++
-// }
-
-// fmt.Printf("\nALL MOVES SORTED:  %v\n", allMoves)
-// finalPrint := []string{}
-// fmt.Printf("\nPATHLISTSTORE: %v\n", pathListStore)
-
-// //Loop through all moves
-// // add :=0
-// // tracker := len(pathListStore)-1
-// // var xCheck int
-// for i, z := 0, 0; i < len(allMoves); i, z = i+1, z+0 {
-
-// 	// if i >= len(queue[tracker]) * tracker+1 {
-// 	// 	if add != len(queue)-1{
-// 	// 		add++
-// 	// 	}
-// 	// 	if tracker > 0 {
-// 	// 	tracker--
-// 	// 	}
-// 	// }
-// 	// fmt.Printf("\n LEN OF PAPTHLISTSTORE: %v| Tracker = %d \n", len(queue[tracker]), tracker)
-// 	fmt.Printf("\nMODULO of Len: %d \n", i%(len(pathListStore)))
-
-// 	if i%(len(pathListStore)) == 0 && i != 0 {
-// 		z++
-// 	}
-
-// 	//Loop through current element
-// 	for j := 0; j < len(allMoves[i]); j++ {
-// 		if z+j > len(finalPrint)-1 {
-// 			finalPrint = append(finalPrint, allMoves[i][j]+" ")
-// 			fmt.Printf("\nAPPENDED: %v| z= %d| j=%d| i=%d \n", allMoves[i][j], z, j, i)
-// 		} else {
-// 			finalPrint[z+j] += allMoves[i][j] + " "
-// 			fmt.Printf("\nADDED: %v| z= %d| j=%d| i=%d\n", allMoves[i][j], z, j, i)
-
-// 		}
-
-// 		//Add to finalprrint at index i+j
-
-// 	}
-// 	fmt.Println(finalPrint)
-// }
-
-// fmt.Printf("\n \n \nFInal PRINT: %v", finalPrint)
-// for i, t := range finalPrint {
-// 	fmt.Printf("\nSTEP %d:  %v ", i, t)
-// }
-
-// fmt.Println(allMoves)
