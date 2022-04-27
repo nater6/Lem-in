@@ -449,84 +449,46 @@ func AntSender(n int, pathList []string) {
 		}
 	}
 	fmt.Printf("ORDER: %v", order)
-	//Apply to ant mover function to each ant in the order list
-	pathNum := 0
-	allMoves := [][]string{}
-	change := 1
-	track := 0
-	for i, num := range order {
-		fmt.Printf("\nALL MOVES%d :  %v \n", i, allMoves)
-		fmt.Printf("\n Track == %v || Change == %d || i == %d\n", track, change, i)
 
-		
-		
-		
-		if len(queue[len(queue)-change]) == track {
-			change++
-			fmt.Printf("\n CHANGED!!!| CHANGE = %d | i = %d | track = %d | len of PAthListSTORE = %d \n", change, i, track, len(pathListStore))
-			track = 0
-		} else if i%(len(pathListStore)-change+1) == 0 && i != 0 {
-			track++
-			fmt.Printf("\nTrack Increased!!!!!!!!!!!!! Track == %d\n", track)
-			
+	container := make([][][]string, len(queue))
+
+	for i := 0; i < len(queue); i++ {
+
+		for _, a := range queue[i] {
+			adder := []string{}
+			for _, room := range pathListStore[i] {
+				str := "L" + a + "-" + room
+				adder = append(adder, str)
+			}
+			container[i] = append(container[i], adder)
+
 		}
-		
-		if pathNum == len(pathListStore)-change+1 {
-			fmt.Println("PATHNUM CHANGED")
-			pathNum = 0
-		}
-		
-		fmt.Printf("\nANT: %v || PathNum: %d\n", num, pathNum)
-		allMoves = append(allMoves, AntMover(num, pathListStore[pathNum]))
-		pathNum++
 	}
 
-	fmt.Printf("\nALL MOVES SORTED:  %v\n", allMoves)
-	finalPrint := []string{}
-	fmt.Printf("\nPATHLISTSTORE: %v\n", pathListStore)
+	fmt.Printf("\n\nCONTAINER!!!!!!!!!!!!!!!!!!!!!!!!111 %v\n\n", container)
+	finalMoves := []string{}
 
-	//Loop through all moves
-	// add :=0
-	// tracker := len(pathListStore)-1
-	// var xCheck int
-	for i, z := 0, 0; i < len(allMoves); i, z = i+1, z+0 {
-
-		// if i >= len(queue[tracker]) * tracker+1 {
-		// 	if add != len(queue)-1{
-		// 		add++
-		// 	}
-		// 	if tracker > 0 {
-		// 	tracker--
-		// 	}
-		// }
-		// fmt.Printf("\n LEN OF PAPTHLISTSTORE: %v| Tracker = %d \n", len(queue[tracker]), tracker)
-		fmt.Printf("\nMODULO of Len: %d \n", i%(len(pathListStore)))
-
-		if i%(len(pathListStore)) == 0 && i != 0 {
-			z++
-		}
-
-		//Loop through current element
-		for j := 0; j < len(allMoves[i]); j++ {
-			if z+j > len(finalPrint)-1 {
-				finalPrint = append(finalPrint, allMoves[i][j]+" ")
-				fmt.Printf("\nAPPENDED: %v| z= %d| j=%d| i=%d \n", allMoves[i][j], z, j, i)
-			} else {
-				finalPrint[z+j] += allMoves[i][j] + " "
-				fmt.Printf("\nADDED: %v| z= %d| j=%d| i=%d\n", allMoves[i][j], z, j, i)
-
+	for _, paths := range container {
+		for j, moves := range paths {
+			for k, room := range moves {
+				if j+k > len(finalMoves)-1{
+					finalMoves = append(finalMoves, room+" ")
+				} else {
+					finalMoves[j+k] += room+" "
+				}
 			}
 
-			//Add to finalprrint at index i+j
+			
 
 		}
-		fmt.Println(finalPrint)
+
 	}
 
-	fmt.Printf("\n \n \nFInal PRINT: %v", finalPrint)
-	for i, t := range finalPrint {
-		fmt.Printf("\nSTEP %d:  %v ", i, t)
+	fmt.Println(finalMoves)
+	for _, print := range finalMoves{
+		fmt.Println(print)
 	}
+
 
 }
 
@@ -539,4 +501,98 @@ func AntMover(n int, path []string) []string {
 	}
 	return antRooms
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//Apply to ant mover function to each ant in the order list
+	// pathNum := 0
+	// allMoves := [][]string{}
+	// change := 1
+	// track := 0
+	// for i, num := range order {
+	// 	fmt.Printf("\nALL MOVES%d :  %v \n", i, allMoves)
+	// 	fmt.Printf("\n Track == %v || Change == %d || i == %d\n", track, change, i)
+
+	// 	if len(queue[len(queue)-change]) == track {
+	// 		change++
+	// 		fmt.Printf("\n CHANGED!!!| CHANGE = %d | i = %d | track = %d | len of PAthListSTORE = %d \n", change, i, track, len(pathListStore))
+	// 		track = 0
+	// 	} else if i%(len(pathListStore)-change+1) == 0 && i != 0 {
+	// 		track++
+	// 		fmt.Printf("\nTrack Increased!!!!!!!!!!!!! Track == %d\n", track)
+
+	// 	}
+
+	// 	if pathNum == len(pathListStore)-change+1 {
+	// 		fmt.Println("PATHNUM CHANGED")
+	// 		pathNum = 0
+	// 	}
+
+	// 	fmt.Printf("\nANT: %v || PathNum: %d\n", num, pathNum)
+	// 	allMoves = append(allMoves, AntMover(num, pathListStore[pathNum]))
+	// 	pathNum++
+	// }
+
+	// fmt.Printf("\nALL MOVES SORTED:  %v\n", allMoves)
+	// finalPrint := []string{}
+	// fmt.Printf("\nPATHLISTSTORE: %v\n", pathListStore)
+
+	// //Loop through all moves
+	// // add :=0
+	// // tracker := len(pathListStore)-1
+	// // var xCheck int
+	// for i, z := 0, 0; i < len(allMoves); i, z = i+1, z+0 {
+
+	// 	// if i >= len(queue[tracker]) * tracker+1 {
+	// 	// 	if add != len(queue)-1{
+	// 	// 		add++
+	// 	// 	}
+	// 	// 	if tracker > 0 {
+	// 	// 	tracker--
+	// 	// 	}
+	// 	// }
+	// 	// fmt.Printf("\n LEN OF PAPTHLISTSTORE: %v| Tracker = %d \n", len(queue[tracker]), tracker)
+	// 	fmt.Printf("\nMODULO of Len: %d \n", i%(len(pathListStore)))
+
+	// 	if i%(len(pathListStore)) == 0 && i != 0 {
+	// 		z++
+	// 	}
+
+	// 	//Loop through current element
+	// 	for j := 0; j < len(allMoves[i]); j++ {
+	// 		if z+j > len(finalPrint)-1 {
+	// 			finalPrint = append(finalPrint, allMoves[i][j]+" ")
+	// 			fmt.Printf("\nAPPENDED: %v| z= %d| j=%d| i=%d \n", allMoves[i][j], z, j, i)
+	// 		} else {
+	// 			finalPrint[z+j] += allMoves[i][j] + " "
+	// 			fmt.Printf("\nADDED: %v| z= %d| j=%d| i=%d\n", allMoves[i][j], z, j, i)
+
+	// 		}
+
+	// 		//Add to finalprrint at index i+j
+
+	// 	}
+	// 	fmt.Println(finalPrint)
+	// }
+
+	// fmt.Printf("\n \n \nFInal PRINT: %v", finalPrint)
+	// for i, t := range finalPrint {
+	// 	fmt.Printf("\nSTEP %d:  %v ", i, t)
+	// }
+
+	// fmt.Println(allMoves)
+
 
