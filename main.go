@@ -505,7 +505,6 @@ func AntSender(n int, pathList []string) []string {
 	}
 	//Final moves is a []string where each element is one step of the result
 	finalMoves := []string{}
-	fmt.Println(container)
 
 	//loop thorugh container and add all the moves to one slice of strings
 	for _, paths := range container {
