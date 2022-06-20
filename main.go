@@ -9,8 +9,7 @@ import (
 	"strings"
 )
 
-//graph structre
-// graph is adjacency list
+// The Graph structure keeps track of all rooms the ant can take, the start and end rooms of the path and the number of ants
 type Graph struct {
 	Rooms     []*Room
 	startRoom string
@@ -18,19 +17,19 @@ type Graph struct {
 	ants      int
 }
 
-// vertex represents graph vertex
+// The Room structure keeps track of the roomname, The rooms that the the current room is connected to and if the room has been visited before
 type Room struct {
 	Roomname string
 	adjacent []string
 	visited  bool
 }
 
-// add vertext
+// AddRoom is a method that adds a new room, name, to a graph
 func (g *Graph) AddRoom(name string) {
 	g.Rooms = append(g.Rooms, &Room{Roomname: name, adjacent: []string{}, visited: false})
 }
 
-//add edge
+//AddLinks is a method that adds a link from one room to another
 func (g *Graph) AddLinks(from, to string) {
 	// get vertex
 	fromRoom := g.getRoom(from)
@@ -46,19 +45,19 @@ func (g *Graph) AddLinks(from, to string) {
 		err := fmt.Errorf(" Existing Link (%v --- %v)", from, to)
 		fmt.Println(err.Error())
 	} else if fromRoom.Roomname == g.endRoom {
-		//Checking for the endroom
+		//Checking for the endroom, if the endroom is present only add the link towards the endroom and not the otherway
 		toRoom.adjacent = append(toRoom.adjacent, fromRoom.Roomname)
 	} else if toRoom.Roomname == g.endRoom {
-		//Checking for the endroom
+		//Checking for the endroom, if the endroom is present only add the link towards the endroom and not the otherway
 		fromRoom.adjacent = append(fromRoom.adjacent, toRoom.Roomname)
 	} else if toRoom.Roomname == g.startRoom {
-		//Checking for the startroom
+		//Checking for the startroom, if the startroom is present only add the link towards the startroom and not the otherway
 		toRoom.adjacent = append(toRoom.adjacent, fromRoom.Roomname)
 	} else if fromRoom.Roomname == g.startRoom {
-		//Checking for the startroom
+		//Checking for the startroom, if the startroom is present only add the link towards the startroom and not the otherway
 		fromRoom.adjacent = append(fromRoom.adjacent, toRoom.Roomname)
 	} else if fromRoom.Roomname != g.endRoom && toRoom.Roomname != g.endRoom {
-
+		//If both rooms are not endrooms then add the link in both directions
 		fromRoom.adjacent = append(fromRoom.adjacent, toRoom.Roomname)
 		toRoom.adjacent = append(toRoom.adjacent, fromRoom.Roomname)
 
@@ -66,7 +65,7 @@ func (g *Graph) AddLinks(from, to string) {
 
 }
 
-// get vertex
+// getRoom is a method that returns a pointer to the room 'name'
 func (g *Graph) getRoom(name string) *Room {
 	for i, v := range g.Rooms {
 		if v.Roomname == name {
@@ -76,7 +75,7 @@ func (g *Graph) getRoom(name string) *Room {
 	return nil
 }
 
-// contains
+// Contains check whether the string name is present in the slice of strings s
 func contains(s []string, name string) bool {
 	for _, v := range s {
 		if name == v {
@@ -88,24 +87,21 @@ func contains(s []string, name string) bool {
 
 func main() {
 
-	
-
 	list1 := []*Room{}
 
 	roomList := &Graph{Rooms: list1}
-	
 
-	 if err := SortFiles(roomList); err!= nil {
-		fmt.Print(err) 
+	if err := SortFiles(roomList); err != nil {
+		fmt.Print(err)
 		return
-	 }
+	}
 
 	file, _ := os.Open(os.Args[1])
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
 
-	for scanner.Scan(){
-		x  := scanner.Text()
+	for scanner.Scan() {
+		x := scanner.Text()
 		fmt.Println(x)
 	}
 
@@ -121,11 +117,10 @@ func main() {
 	SortFiles(roomList1)
 
 	BFS(roomList1.startRoom, roomList1.endRoom, roomList1, &allPathsBFS, ShortestPath)
-		//Sort the path lists in order
+	//Sort the path lists in order
 
 	lenSorter(&allPathsBFS)
 	lenSorter(&allPathsDFS)
-	
 
 	//Send ants using the function
 	antNum := roomList.ants
@@ -147,23 +142,26 @@ func main() {
 
 }
 
+//BFS preforms a Breadth First Search of a graph from rooms start to end and puts all paths found in the []string paths
 func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, start string, end string, path Array) Array) {
-
+	//begin is the pointer to the start room of the search
 	begin := g.getRoom(start)
 
+	//if (len==2) the second adjacent room is the end room because of the way the rooms are added so we switch them to make the endroom the first adjacent room checked
 	if len(begin.adjacent) == 2 {
 		begin.adjacent[0], begin.adjacent[1] = begin.adjacent[1], begin.adjacent[0]
 	}
 
+	//loop through the adjacent rooms
 	for i := 0; i < len(begin.adjacent); i++ {
 
-		
+		//shortpath is a variable we will use the path we are checking (Array is a structure of type []string made earlier)
 		var shortPath Array
 
-		//Find all possible paths with unvisited rooms
+		//Shortest path is a function used to find the possible paths from start to end, and sort them by length in ascending order, using unvisited room
 		ShortestPath(g, g.startRoom, g.endRoom, shortPath)
 
-		// Get the value string of the shortest path
+		// shortstorer is a variable that stores the shortest path from the start to the end
 		var shortStorer string
 		if len(pathArray) != 0 {
 			shortStorer = pathArray[0]
@@ -175,12 +173,12 @@ func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, star
 			}
 		}
 
-		//Remove the sqr brackes form the string
+		//Remove the square brackes form the string
 		if len(pathArray) != 0 {
 			shortStorer = shortStorer[1 : len(shortStorer)-1]
 		}
 
-		//Mark the rooms in the path as visited
+		//Turn the path string into a slice to mark in as visited
 
 		shortStorerSlc := strings.Split(shortStorer, " ")
 		shortStorerSlc = shortStorerSlc[1:]
@@ -190,6 +188,7 @@ func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, star
 			g.getRoom(shortStorerSlc[z]).visited = true
 		}
 
+		//loop throigh the slice and turn it back into a string
 		var pathStr string
 		if len(shortStorerSlc) != 0 {
 			for i := 0; i < len(shortStorerSlc); i++ {
@@ -201,6 +200,7 @@ func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, star
 			}
 		}
 
+		//Check if the path found is already in the the overall path []string, if its not then add it
 		if len(pathStr) != 0 {
 			containing := false
 			for _, v := range *paths {
@@ -212,13 +212,15 @@ func BFS(start, end string, g *Graph, paths *[]string, f func(graph *Graph, star
 				*paths = append(*paths, pathStr)
 			}
 		}
-
+		//Reset pathArray to check next adjacent room if no path found
 		pathArray = []string{}
 	}
 
 }
 
+//SortFiles sorts goes through the txt file with the ants and rooms and adds the rooms and links to the graph
 func SortFiles(g *Graph) error {
+	//Create a scanner to go through each line of the txt file
 	file, _ := os.Open(os.Args[1])
 	scanner := bufio.NewScanner(file)
 	start := false
@@ -230,21 +232,25 @@ func SortFiles(g *Graph) error {
 
 	for scanner.Scan() {
 		x := scanner.Text()
+		//Check if there is a valid number of ants on the file
 		if firstLine {
 			g.ants, _ = strconv.Atoi(x)
-			if g.ants == 0{
+			if g.ants == 0 {
 				return errors.New("ERROR: invalid data format")
 			}
 			firstLine = false
 		}
 
+		//create a []string that holds all information in the current line of the text file
 		space := strings.Split(scanner.Text(), " ")
 
+		//If len > 1 the line is specifiying a room with the first element of the slice being the room, use Addroom to add the room the the graph
 		if len(space) > 1 {
 			g.AddRoom(space[0])
 			i++
 		}
 
+		//Check if the room is the start or end room if so assign the start/endroom element of the graph to the room
 		if start {
 			g.startRoom = g.Rooms[i-1].Roomname
 			start = false
@@ -253,16 +259,21 @@ func SortFiles(g *Graph) error {
 			end = false
 		}
 
+		//Now check if the line is specifying links between rooms
 		hyphen := strings.Split(scanner.Text(), "-")
+		//If the length > 1 then the line of the txt file is linking two rooms together
 		if len(hyphen) > 1 {
+			//Check if both rooms on the line are the same (If the room links to itself)
 			if hyphen[0] == hyphen[1] {
 				return errors.New("ERROR: invalid data format")
-				
+
 			}
+			//If they dont link to them selves use the AddLinks method to add the link to both room
 			g.AddLinks(hyphen[0], hyphen[1])
 
 		}
 
+		//Check if the line after will contain the start/endroom
 		if x == "##start" {
 			start = true
 		}
@@ -272,20 +283,23 @@ func SortFiles(g *Graph) error {
 		}
 
 	}
+	//If the txt file is a valid format return no error
 	return nil
 
 }
 
+//DFS preforms a depth first search of a graph and returns the possible paths
 func DFS(current, end string, g *Graph, path string, pathList *[]string) {
-	//Get the pointer and all information for the current roo
 
 	//Check if the current room is the end room
 	curr := g.getRoom(current)
 
+	//Mark the room as visited (Unless it is the end room, so the endroom can be accessed in another path)
 	if current != end {
 		curr.visited = true
 	}
 
+	//Add the current room to the path string
 	if curr.Roomname == g.endRoom {
 		path += current
 	} else if !(curr.Roomname == g.startRoom) {
@@ -294,14 +308,16 @@ func DFS(current, end string, g *Graph, path string, pathList *[]string) {
 
 	//Create bool var to to be true if the current room == end
 	final := false
-
+	//Check if the current room is the end room
 	if current == end {
-
+		//Add the path found to the pathroom
 		*pathList = append(*pathList, path)
+		//Reset the path to find another room
 		path = ""
 
 		final = true
 
+		//If the start room is adjacent to the endroom remove the link as it would be found first
 		for i := 0; i < len(g.getRoom(g.startRoom).adjacent); i++ {
 			if g.getRoom(g.startRoom).adjacent[i] == g.endRoom {
 				g.getRoom(g.startRoom).adjacent[i] = ""
@@ -310,6 +326,7 @@ func DFS(current, end string, g *Graph, path string, pathList *[]string) {
 
 	}
 
+	//If the end room has been found call the function again, from the the start room to check for another path
 	if final {
 		DFS(g.startRoom, end, g, path, pathList)
 	}
@@ -325,12 +342,14 @@ func DFS(current, end string, g *Graph, path string, pathList *[]string) {
 
 	// recurssively call the func to the end
 	for i := 0; i < len(curr.adjacent); i++ {
+		//if the element in the adj room is "" then its empty so skip
 		if curr.adjacent[i] == "" {
 			continue
 		}
 		//Get information for the current room
 		x := g.getRoom(curr.adjacent[i])
 
+		//If the room has been visited before skip, if not check the next recursivly call the DFS func from the next room
 		if x.visited {
 			continue
 		} else {
@@ -343,6 +362,7 @@ type Array []string
 
 var pathArray Array
 
+//hasPropertyOf is a method that checks if an array/[]string contains a string
 func (arr Array) hasPropertyOf(str string) bool {
 	for _, v := range arr {
 		if str == v {
@@ -352,22 +372,28 @@ func (arr Array) hasPropertyOf(str string) bool {
 	return false
 }
 
+//ShortestPath finds all the possible paths from start to end room using BFS and sorts them in ascending order
 func ShortestPath(graph *Graph, start string, end string, path Array) Array {
+	//Add the room to the [ath]
 	path = append(path, start)
+	//If the currentroom is the endroom retrun the path
 	if start == end {
 		return path
 	}
+
 	shortest := make([]string, 0)
+	//go through the adjacent rooms to the start room
 	for _, node := range graph.getRoom(start).adjacent {
+		//if the current path doesn't contain the adj room and the room is not visited recursively call the function dhortest path
 		if !path.hasPropertyOf(node) && !graph.isVisited(node) {
 			newPath := ShortestPath(graph, node, end, path)
 			if len(newPath) > 0 {
 				if newPath.hasPropertyOf(graph.startRoom) && newPath.hasPropertyOf(end) {
 					pathArray = append(pathArray, fmt.Sprint(newPath))
-					if len(shortest) == 0 || (len(newPath) < len(shortest)) {
+					// if len(shortest) == 0 || (len(newPath) < len(shortest)) {
 
-						shortest = newPath
-					}
+					// 	shortest = newPath
+					// }
 				}
 			}
 		}
@@ -379,8 +405,9 @@ func (graph *Graph) isVisited(str string) bool {
 	return graph.getRoom(str).visited
 }
 
-func lenSorter(paths *[]string) {
 
+//lenSorter sorts all paths found in ascending order
+func lenSorter(paths *[]string) {
 	x := *paths
 	for i := 0; i < len(x); i++ {
 		for j := 0; j < len(x); j++ {
@@ -392,23 +419,29 @@ func lenSorter(paths *[]string) {
 	*paths = x
 }
 
+
+//AntSender puts the 
 func AntSender(n int, pathList []string) []string {
 	pathListStore := [][]string{}
+	
 
+	//go through each path and turn the string into []string where each element is a room on the path
 	for _, v := range pathList {
 		s := strings.Split(v, "-")
 		pathListStore = append(pathListStore, s)
 	}
 
+
 	lenP := len(pathList)
 
+	//queue is a [][]strings with the ants going down each path in each slice [[1234][567][89]]
 	queue := make([][]string, lenP)
 
 	x := 0
 
 	for i := 1; i <= n; i++ {
 		ant := strconv.Itoa(i)
-
+		//If the number of steps in the curr room + num of ants is less than that of the next add to the current room else add the the next (if x is at the last room lenP-1 set x back to the first room)
 		if x == lenP-1 {
 			if len(pathListStore[x])+len(queue[x]) <= len(pathListStore[0])+len(queue[0]) {
 				queue[x] = append(queue[x], ant)
@@ -429,6 +462,7 @@ func AntSender(n int, pathList []string) []string {
 	}
 
 	longest := len(queue[0])
+	fmt.Println(("--------------"), queue)
 
 	for i := 0; i < len(queue); i++ {
 		if len(queue[i]) > longest {
@@ -438,15 +472,19 @@ func AntSender(n int, pathList []string) []string {
 
 	order := []int{}
 
+	//loop through all the queue and determine the order 
+
 	for j := 0; j < longest; j++ {
 		for i := 0; i < len(queue); i++ {
 			if j < len(queue[i]) {
+				//Adds the ants from each path that can run at the same time
 				x, _ = strconv.Atoi(queue[i][j])
 				order = append(order, x)
 			}
 		}
 	}
 
+	//container is a [][][]string that holds all the movements
 	container := make([][][]string, len(queue))
 
 	for i := 0; i < len(queue); i++ {
@@ -472,13 +510,9 @@ func AntSender(n int, pathList []string) []string {
 					finalMoves[j+k] += room + " "
 				}
 			}
-
 		}
-
 	}
-
 	return finalMoves
-
 }
 
 func AntMover(n int, path []string) []string {
