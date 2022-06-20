@@ -86,16 +86,17 @@ func contains(s []string, name string) bool {
 }
 
 func main() {
-
+	//create a graph
 	list1 := []*Room{}
-
 	roomList := &Graph{Rooms: list1}
 
+	//sort thorugh the .txt file
 	if err := SortFiles(roomList); err != nil {
 		fmt.Print(err)
 		return
 	}
 
+	//Print the contents of the file in the terminal
 	file, _ := os.Open(os.Args[1])
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
@@ -125,11 +126,13 @@ func main() {
 	//Send ants using the function
 	antNum := roomList.ants
 
+	// Preform the Searches using BFS and DFS 
 	DFSSearch := AntSender(antNum, allPathsDFS)
 	BFSSearch := AntSender(antNum, allPathsBFS)
 
 	Printer := []string{}
 
+	//compare the DFS and BFS search and print the shorter one
 	if len(DFSSearch) < len(BFSSearch) {
 		Printer = DFSSearch
 	} else {
@@ -462,7 +465,6 @@ func AntSender(n int, pathList []string) []string {
 	}
 
 	longest := len(queue[0])
-	fmt.Println(("--------------"), queue)
 
 	for i := 0; i < len(queue); i++ {
 		if len(queue[i]) > longest {
@@ -487,26 +489,33 @@ func AntSender(n int, pathList []string) []string {
 	//container is a [][][]string that holds all the movements
 	container := make([][][]string, len(queue))
 
+	//Loop thorugh the queue and send the ants
 	for i := 0; i < len(queue); i++ {
-
+		//loop through each room of each path and add each ants movements
 		for _, a := range queue[i] {
 			adder := []string{}
 			for _, room := range pathListStore[i] {
 				str := "L" + a + "-" + room
 				adder = append(adder, str)
 			}
+			//add all of the rooms of ant a to the container
 			container[i] = append(container[i], adder)
 
 		}
 	}
+	//Final moves is a []string where each element is one step of the result
 	finalMoves := []string{}
+	fmt.Println(container)
 
+	//loop thorugh container and add all the moves to one slice of strings
 	for _, paths := range container {
 		for j, moves := range paths {
 			for k, room := range moves {
+				//if finalmoves doesnt have aan moving at that index yet add the index
 				if j+k > len(finalMoves)-1 {
 					finalMoves = append(finalMoves, room+" ")
 				} else {
+					//if an ant is moving at a step that has already been added add it to the step
 					finalMoves[j+k] += room + " "
 				}
 			}
@@ -515,12 +524,14 @@ func AntSender(n int, pathList []string) []string {
 	return finalMoves
 }
 
-func AntMover(n int, path []string) []string {
-	antRooms := []string{}
-	x := strconv.Itoa(n)
-	for i := 0; i < len(path); i++ {
-		str := "L" + x + "-" + path[i]
-		antRooms = append(antRooms, str)
-	}
-	return antRooms
-}
+// func AntMover(n int, path []string) []string {
+// 	antRooms := []string{}
+// 	x := strconv.Itoa(n)
+// 	for i := 0; i < len(path); i++ {
+// 		str := "L" + x + "-" + path[i]
+// 		antRooms = append(antRooms, str)
+// 	}
+// 	return antRooms
+// }
+
+
