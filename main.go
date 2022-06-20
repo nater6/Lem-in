@@ -86,7 +86,7 @@ func contains(s []string, name string) bool {
 }
 
 func main() {
-	//create a graph
+	//create a graph for the DFS search
 	list1 := []*Room{}
 	roomList := &Graph{Rooms: list1}
 
@@ -112,7 +112,7 @@ func main() {
 	var path string
 	DFS(roomList.startRoom, roomList.endRoom, roomList, path, &allPathsDFS)
 
-	//Run the Shortest path search
+	//Create a new graph to use for the BFS search
 	list2 := []*Room{}
 	roomList1 := &Graph{Rooms: list2}
 	SortFiles(roomList1)
